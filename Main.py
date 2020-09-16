@@ -126,6 +126,7 @@ def classView():
     logger("Not login! Redirect to Login page")
     return redirect(url_for("login"))
 
-app.run(host = "0.0.0.0", port = "9487", ssl_context=("../../Certs/cert.pem", "../../Certs/privkey.pem"))
+if ssl: app.run(host = "0.0.0.0", port = "9487")
+else: app.run(host = "0.0.0.0", port = "9487", ssl_context = ssl)
 
 # ----- End of Flask -----
