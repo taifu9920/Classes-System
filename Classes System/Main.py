@@ -1,9 +1,13 @@
 from flask import Flask, request, render_template, session, redirect, url_for
 from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
+from tinydb import TinyDB, Query
 import waitress, requests, bs4, os
 
 from config import *
+
+db = TinyDB("db.tinydb")
+query = Query()
 
 Codes = {
     "B01":"綜合大樓",
@@ -47,7 +51,10 @@ incoming = lambda req: logger("Incoming connection from {0}, target page {1}".fo
 
 # ----- Flask Programs -----
 app = Flask(__name__, static_folder='templates/static', template_folder='templates')
-app.config['SECRET_KEY'] = 'd53b87b1bf71e4ec7151d2382d8a520e'
+secret = db.get(query.secret.exists())
+if secret == None: secret = os.urandom(24).hex() ; db.insert({"secret": secret})
+else: secret = secret["secret"]
+app.config['SECRET_KEY'] = secret
 CSRFProtect(app)
 
 @app.route("/")
@@ -92,31 +99,33 @@ def classes():
 @app.route("/classes")
 def classView():
     incoming(request)
-    sess = Auth(session["acc"], session["psw"])
-    resp = sess.get("https://course.nuk.edu.tw/Sel/roomlist1.asp")
-    resp.encoding = "big5"
-    info = bs4.BeautifulSoup(resp.text, "lxml")
-    classes = info.table
-    classes["class"] = "w3-table w3-striped w3-border w3-gray"
-    classes.tr["class"] = "w3-green"
-    classes["id"] = "classes"
-    classes["style"] = None
-    for i in classes.find_all("tr")[1:]:
-        for o in i.find_all("td")[:2]:
-            o["class"] = "w3-green"
-        for o in i.find_all("td")[2:]:
-            if o.string == None and str(o.contents[-1]) != "<br/>":
-                for j in Codes.items():
-                    o.contents[-1].replace_with(o.contents[-1].replace(j[0], j[1]))
-                temp = o.contents[-1].split(",")
-                if len(temp) > 1:
-                    o.contents[-1].replace_with(temp[0])
-                    for j in temp[1:]:
-                        o.contents.append(info.new_tag("br"))
-                        o.contents.append(info.new_string(j))
+    if session.get("login"):
+        sess = Auth(session["acc"], session["psw"])
+        resp = sess.get("https://course.nuk.edu.tw/Sel/roomlist1.asp")
+        resp.encoding = "big5"
+        info = bs4.BeautifulSoup(resp.text, "lxml")
+        classes = info.table
+        classes["class"] = "w3-table w3-striped w3-border w3-gray"
+        classes.tr["class"] = "w3-green"
+        classes["id"] = "classes"
+        classes["style"] = None
+        for i in classes.find_all("tr")[1:]:
+            for o in i.find_all("td")[:2]:
+                o["class"] = "w3-green"
+            for o in i.find_all("td")[2:]:
+                if o.string == None and str(o.contents[-1]) != "<br/>":
+                    for j in Codes.items():
+                        o.contents[-1].replace_with(o.contents[-1].replace(j[0], j[1]))
+                    temp = o.contents[-1].split(",")
+                    if len(temp) > 1:
+                        o.contents[-1].replace_with(temp[0])
+                        for j in temp[1:]:
+                            o.contents.append(info.new_tag("br"))
+                            o.contents.append(info.new_string(j))
+        return render_template("class.html", Version = "1.0.0", Tables = classes)
+    logger("Not login! Redirect to Login page")
+    return redirect(url_for("login"))
 
-    return render_template("class.html", Version = "1.0.0", Tables = classes)
-
-waitress.serve(app, host = "0.0.0.0", port = "8787")
+waitress.serve(app, host = "0.0.0.0", port = "9487")
 
 # ----- End of Flask -----
