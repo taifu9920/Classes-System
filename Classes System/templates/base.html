@@ -21,7 +21,7 @@
             <input type="checkbox" id="slider">
             <span class="slider round"></span>
         </label>
-		<section class="Content">
+		<section {{ ContentAttri|safe }} class="Content">
 			{% block Contents %}{% endblock %}
 		</section>
 		<hr>

@@ -16,19 +16,24 @@ h2 {
     height:             100%;
     background-color:   gray;
 }
-#classes {
+#ClassesContent table {
 	padding-left: 8px;
 }
-#classes td{
+#ClassesContent td{
 	text-align: center;
-	padding-left: 8px;
+	vertical-align: middle;
 	color: green;
-	font-size: 1px;
+	font-size: 14px;
 	padding: 4px;
+	height: 100px;
 }
-#classes th{
+#ClassesContent th{
 	text-align: center;
 	padding-left: 8px;
+}
+#ClassesContent {
+	max-width: 100%;
+	margin: 0;
 }
 .switch {
   position: fixed;

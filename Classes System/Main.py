@@ -107,7 +107,6 @@ def classView():
         classes = info.table
         classes["class"] = "w3-table w3-striped w3-border w3-gray"
         classes.tr["class"] = "w3-green"
-        classes["id"] = "classes"
         classes["style"] = None
         for i in classes.find_all("tr")[1:]:
             for o in i.find_all("td")[:2]:
@@ -122,7 +121,7 @@ def classView():
                         for j in temp[1:]:
                             o.contents.append(info.new_tag("br"))
                             o.contents.append(info.new_string(j))
-        return render_template("class.html", Version = "1.0.0", Tables = classes)
+        return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'")
     logger("Not login! Redirect to Login page")
     return redirect(url_for("login"))
 
