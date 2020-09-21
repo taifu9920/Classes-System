@@ -88,21 +88,11 @@ function Load() {
 	setThemeFromCookie()
 	document.getElementById("slider").addEventListener("change", toggleTheme);
 	
-	var Home = document.getElementById("Home");
-	var Return = document.getElementById("Return");
-	var VolSwitch = document.getElementById("volume");
-	var CopyButton = document.getElementById("CopyButton")
-	
-	if (Home != null) Home.addEventListener("click", function(){window.location.href = "/";});
-	if (Return != null) Return.addEventListener("click", function(){window.location.replace(document.referrer)});
-	if (CopyButton != null) CopyButton.addEventListener("click", CopyArea);
-	if (VolSwitch != null) {
-		var viewval = document.getElementById("VolNow");
-		VolSwitch.value = viewval.innerHTML;
-		VolSwitch.oninput = function(){viewval.innerHTML = this.value;};
-	}
+	$(".checkbox").change(function() {
+		this.parentNode.childNodes[2].disabled = !this.checked
+	});
 	
 	document.getElementById("mask").remove();
 }
 
-window.addEventListener("load", Load)
+window.addEventListener("DOMContentLoaded", Load)

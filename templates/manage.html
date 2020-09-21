@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block Contents %}
+<div class="w3-card-4 w3-center">
+	<div class="w3-container w3-red"><h2>Nuk Classes Manager</h2></div>
+	<form method = "POST">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+		<input type="text" class="w3-input w3-red w3-center" value="{{ classID }}" disabled>
+		<input type="text" class="w3-input w3-red w3-center" value="{{ className }}" disabled>
+		<p class="w3-red w3-center label">總上課周數：</p>
+		<input type="number" id="weeks" name="weeks" class="w3-input w3-green w3-center" value="{{ totalweeks }}">
+		<input type="text" class="w3-input w3-red w3-center" value="{{ teacher }}" disabled>
+		<div>
+			<p class="w3-purple w3-center" onclick='$("#rooms").slideToggle()'>[課程地點]</p>
+			<dl id="rooms" class="w3-green w3-center" style="display: none;">
+				{{ ClassRooms|safe }}
+			</dl>
+		</div>
+		<div>
+			<p class="w3-purple w3-center" onclick='$("#notes").slideToggle()'>[課堂備註]</p>
+			<dl id="notes" class="w3-green w3-center" style="display: none;">
+				{{ ClassInfos|safe }}
+			</dl>
+		</div>
+		<p></p><button class="w3-btn w3-red w3-center" type="submit"/>Send</button><p></p>
+	</form>
+</div>
+{% endblock %}
