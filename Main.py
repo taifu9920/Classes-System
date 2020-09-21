@@ -32,7 +32,7 @@ def gen_checkbox(id, week, holder, value):
     return '<dd><label for="{0}">第{1}周</label><input type="checkbox" id="{0}" class="w3-check checkbox" {4}/><input name="{0}" class="w3-input w3-border" type="text" placeholder="{2}" value="{5}" {3}></dd>'.format(id, week, holder, "" if value else "disabled", "checked" if value else "", value)
 
 def getWeek():
-    return str(((datetime.now(tw) - d_start).days % 6) + 1)
+    return str(((datetime.now(tw) - d_start).days // 7) + 1)
 
 def logger(msg, code = 0):
     #0 to 4 are available
