@@ -146,67 +146,73 @@ def classView():
             classes.tr["class"] = "w3-green"
             classes["style"] = None
             data = Classdata(sess)
+            weeknow = int(getWeek())
             for i in classes.find_all("tr")[1:]:
                 for o in i.find_all("td")[:2]:
                     o["class"] = "w3-green"
+                k = 0
                 for o in [o for o in i.find_all("td")[2:] if o.contents[0].string and o.contents[0].string != "\u3000"]:
                     #All classes
+                    day = str((weeknow + 1) if k < datetime.now(tw).weekday() else weeknow)
                     classid = o.contents[0].string
-                    weeks = tinydb.db.get(query[session["acc"]][classid].weeks.exists())[session["acc"]][classid]["weeks"]
-                    if int(getWeek()) <= weeks:
-                        if str(o.contents[-1]) != "<br/>":
-                            #Classes that has room
-                            #Translate classroom
-                            for j in Codes.items():
-                                o.contents[-1].replace_with(o.contents[-1].replace(j[0], j[1]))
-                            room = tinydb.db.get(query[session["acc"]][classid]["room" + getWeek()].exists())
-                            if room:
-                                room = room[session["acc"]][classid]["room" + getWeek()]
-                                temp = [i for i in o.contents[-1].split(",") if i != room]
-                                o.contents[-1].replace_with(room)
-                                if len(temp) > 1:
-                                    temp[0] = "(" + temp[0]
-                                    temp[-1] = temp[-1] + ")"
-                                    for j in temp:
-                                        if room: o.contents.append(info.new_tag("br"))
-                                        else: room = True
-                                        o.contents.append(info.new_string(j))
-                                elif len(temp) == 1:
+                    weeks = tinydb.db.get(query[session["acc"]][classid].weeks.exists())
+                    if weeks: weeks = weeks[session["acc"]][classid]["weeks"]
+                    else: weeks = max_week
+                        
+                    if str(o.contents[-1]) != "<br/>":
+                        #Classes that hasroo m
+                        #Translate classroom
+                        for j in Codes.items():
+                            o.contents[-1].replace_with(o.contents[-1].replace(j[0], j[1]))
+                        room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
+                        if room:
+                            room = room[session["acc"]][classid]["room" + day]
+                            temp = [i for i in o.contents[-1].split(",") if i != room]
+                            o.contents[-1].replace_with(room)
+                            if len(temp) > 1:
+                                temp[0] = "(" + temp[0]
+                                temp[-1] = temp[-1] + ")"
+                                for j in temp:
                                     if room: o.contents.append(info.new_tag("br"))
-                                    o.contents.append(info.new_string("(%s)" % temp[0]))
-                                data[classid][6] = "".join([str(i) for i in o.contents[2:]]).strip()
-                            else: 
-                                o.contents = []
-                                if data.get(classid): data[classid][6] = ""
-                        else:
-                            room = tinydb.db.get(query[session["acc"]][classid]["room" + getWeek()].exists())
-                            if room:
-                                room = room[session["acc"]][classid]["room" + getWeek()]
-                                o.contents.append(info.new_string(room))
-                                data[classid][6] = room
-                            else: 
-                                o.contents = []
-                                if data.get(classid): data[classid][6] = ""
-                    else: o.contents = []
+                                    else: room = True
+                                    o.contents.append(info.new_string(j))
+                            elif len(temp) == 1:
+                                if room: o.contents.append(info.new_tag("br"))
+                                o.contents.append(info.new_string("(%s)" % temp[0]))
+                            data[classid][6] = "<br>".join([str(i) for i in o.contents[3:] if str(i) != "<br/>"]).strip()
+                        else: 
+                            o.contents = []
+                            if data.get(classid): data[classid][6] = ""
+                    else:
+                        room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
+                        if room:
+                            room = room[session["acc"]][classid]["room" + day]
+                            o.contents.append(info.new_string(room))
+                            data[classid][6] = room
+                        else: 
+                            o.contents = []
+                            if data.get(classid): data[classid][6] = ""
+                    k = (k+1) % 7
             schedule = {i[1]:i[5] for i in data.values()}
             week = datetime.now(tw).weekday()
             now_time = datetime.now(tw).time()
             nextID = stat = start = None # - stat - : 0 = before, 1 = in class
             begin = week 
             while not nextID:
-                for i in [i for i in schedule.items() if Date[week] in i[1]]:
+                for i in sorted([i for i in schedule.items() if Date[week] in i[1]], key=lambda x: x[1]):
                     for o in [o for o in Timer.items() if str(o[0]) in i[1]]:
-                        if TimeCompare(o[1], now_time) or now_time < o[1][0]:
+                        if ((TimeCompare(o[1], now_time) or now_time < o[1][0]) and data[i[0]][6]) or (week < begin and data[i[0]][6]):
                             nextID = i[0]
                             stat = 0 if now_time < o[1][0] else 1
-                            start = o[1][0] if now_time < o[1][0] else o[1][1]
-                            break
+                            start = o[1][0] if now_time < o[1][0] or week < begin else o[1][1]
+                            break 
+                    if nextID: break
                 week = ( week + 1 ) % 7
                 if week == begin: break
-            note = tinydb.db.get(query[session["acc"]][nextID]["note" + getWeek()].exists())
-            if note: note = note[session["acc"]][nextID]["note" + getWeek()]
-            nextclass = ((("{0}下課<br>正在上{1}" if stat else "{0}上課<br>下堂課是{1}") + "，位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
-            return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=getWeek(), NextClass=nextclass)
+            note = tinydb.db.get(query[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)].exists())
+            if note: note = note[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)]
+            nextclass = ("下周" if week < begin else "本周") + ((("{0}下課<br>正在上{1}" if stat and week >= begin else "{0}上課<br>下堂課是{1}") + "<br>位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
+            return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=str(weeknow), NextClass=nextclass)
     logger("Not login! Redirect to Login page")
     return redirect(url_for("login"))
 
