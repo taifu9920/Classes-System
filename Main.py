@@ -32,6 +32,12 @@ TimeCompare = lambda obj, val: obj[0] < val and val < obj[1]
 #Get the week since started classes
 getWeek = lambda: str(((datetime.now(tw) - d_start).days // 7) + 1)
 
+#Check exist path
+PathExist = lambda path: os.path.exists(path)
+
+#Connection message
+incoming = lambda req: logger("Incoming connection from {0}, target page {1}".format(req.remote_addr, req.path), 1)
+
 #Get all class datas
 def Classdata(sess):
     resp = sess.get("https://course.nuk.edu.tw/Sel/query3.asp")
@@ -54,6 +60,12 @@ def FolderInit(path):
     if not PathExist(path):
         os.makedirs(path)
 
+#Translate classroom
+def RoomTranslate(room):
+    for j in Codes.items():
+        room = room.replace(j[0], j[1])
+    return room
+
 #Login to class selection system and get Session
 def Auth(acc, psw):
     sess = requests.session()
@@ -74,14 +86,9 @@ def Auth(acc, psw):
             room = i[1][6].split(",")[0].strip()
             if room == "": room = "無標記教室"
             for o in range(1, max_week + 1):
-                for j in Codes.items():
-                    room = room.replace(j[0], j[1])
+                room = RoomTranslate(room)
                 tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
     return sess
-
-PathExist = lambda path: os.path.exists(path)
-#Connection message
-incoming = lambda req: logger("Incoming connection from {0}, target page {1}".format(req.remote_addr, req.path), 1)
 # ----- End of Functions -----
 
 # ----- Flask Programs -----
@@ -143,8 +150,8 @@ def classView():
             info = bs4.BeautifulSoup(resp.text, "lxml")
             classes = info.table
             classes["class"] = "w3-table w3-striped w3-border w3-gray"
-            classes.tr["class"] = "w3-green"
             classes["style"] = None
+            classes.tr["class"] = "w3-green"
             data = Classdata(sess)
             weeknow = int(getWeek())
             for i in classes.find_all("tr")[1:]:
@@ -160,18 +167,15 @@ def classView():
                     else: weeks = max_week
                         
                     if str(o.contents[-1]) != "<br/>":
-                        #Classes that hasroo m
-                        #Translate classroom
-                        for j in Codes.items():
-                            o.contents[-1].replace_with(o.contents[-1].replace(j[0], j[1]))
+                        #Classes that has room
+                        o.contents[-1].replace_with(RoomTranslate(o.contents[-1]))
                         room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
                         if room:
                             room = room[session["acc"]][classid]["room" + day]
                             temp = [i for i in o.contents[-1].split(",") if i != room]
                             o.contents[-1].replace_with(room)
                             if len(temp) > 1:
-                                temp[0] = "(" + temp[0]
-                                temp[-1] = temp[-1] + ")"
+                                temp[0] = "(" + temp[0] ; temp[-1] = temp[-1] + ")"
                                 for j in temp:
                                     if room: o.contents.append(info.new_tag("br"))
                                     else: room = True
@@ -201,17 +205,18 @@ def classView():
             while not nextID:
                 for i in sorted([i for i in schedule.items() if Date[week] in i[1]], key=lambda x: x[1]):
                     for o in [o for o in Timer.items() if str(o[0]) in i[1]]:
-                        if ((TimeCompare(o[1], now_time) or now_time < o[1][0]) and data[i[0]][6]) or (week < begin and data[i[0]][6]):
+                        if ((TimeCompare(o[1], now_time) or now_time < o[1][0] or begin != week) and data[i[0]][6]):
                             nextID = i[0]
                             stat = 0 if now_time < o[1][0] else 1
                             start = o[1][0] if now_time < o[1][0] or week < begin else o[1][1]
                             break 
                     if nextID: break
+                if nextID: break
                 week = ( week + 1 ) % 7
                 if week == begin: break
             note = tinydb.db.get(query[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)].exists())
             if note: note = note[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)]
-            nextclass = ("下周" if week < begin else "本周") + ((("{0}下課<br>正在上{1}" if stat and week >= begin else "{0}上課<br>下堂課是{1}") + "<br>位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
+            nextclass = ("下" if week < begin else "本") + ((("周{3}{0}下課<br>正在上{1}" if stat and begin == week else "周{3}{0}上課<br>下堂課是{1}") + "<br>位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6], Date[week]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
             return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=str(weeknow), NextClass=nextclass)
     logger("Not login! Redirect to Login page")
     return redirect(url_for("login"))
