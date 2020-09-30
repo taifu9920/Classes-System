@@ -158,7 +158,7 @@ def classView():
                 for o in i.find_all("td")[:2]:
                     o["class"] = "w3-green"
                 k = 0
-                for o in [o for o in i.find_all("td")[2:] if o.contents[0].string and o.contents[0].string != "\u3000"]:
+                for o in i.find_all("td")[2:]:
                     #All classes
                     day = str((weeknow + 1) if k < datetime.now(tw).weekday() else weeknow)
                     classid = o.contents[0].string
@@ -168,10 +168,10 @@ def classView():
                         
                     if str(o.contents[-1]) != "<br/>":
                         #Classes that has room
-                        o.contents[-1].replace_with(RoomTranslate(o.contents[-1]))
                         room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
                         if room:
                             room = room[session["acc"]][classid]["room" + day]
+                            o.contents[-1].replace_with(RoomTranslate(o.contents[-1]))
                             temp = [i for i in o.contents[-1].split(",") if i != room]
                             o.contents[-1].replace_with(room)
                             if len(temp) > 1:
