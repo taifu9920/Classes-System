@@ -88,6 +88,11 @@ function Load() {
 	setThemeFromCookie()
 	document.getElementById("slider").addEventListener("change", toggleTheme);
 	
+	var Home = document.getElementById("Home");
+	var Return = document.getElementById("Return");
+	if (Home != null) Home.addEventListener("click", function(){window.location.href = "/";});
+	if (Return != null) Return.addEventListener("click", function(){window.location.replace(document.referrer)});
+	
 	$(".checkbox").change(function() {
 		this.parentNode.childNodes[2].disabled = !this.checked
 	});

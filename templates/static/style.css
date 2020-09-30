@@ -19,6 +19,10 @@ h2 {
 #ClassesContent table {
 	padding-left: 8px;
 }
+#Home , #Return{
+	margin: 0 auto;
+	display: block;
+}
 #ClassesContent td{
 	text-align: center;
 	vertical-align: middle;
