@@ -208,7 +208,7 @@ def classView():
                         if ((TimeCompare(o[1], now_time) or now_time < o[1][0] or begin != week) and data[i[0]][6]):
                             nextID = i[0]
                             stat = 0 if now_time < o[1][0] else 1
-                            start = o[1][0] if now_time < o[1][0] or week < begin else o[1][1]
+                            start = o[1][0] if now_time < o[1][0] or week != begin else o[1][1]
                             break 
                     if nextID: break
                 if nextID: break
