@@ -276,7 +276,7 @@ def EditClass(classID):
         else:
             data = request.form
             weeks = data.get("weeks")
-            if not weeks or not(weeks in range(0, max_week)): weeks = max_week
+            if not weeks or not(int(weeks) in range(1, max_week+1)): weeks = max_week
             else: weeks = int(weeks)
             tinydb.db.remove(query[session["acc"]][classID].exists())
             tinydb.db.insert({session["acc"] : {classID: {"weeks": weeks}}})
