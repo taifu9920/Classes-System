@@ -240,7 +240,7 @@ def classView():
                         if ((TimeCompare(o[1], now_time) or now_time < o[1][0] or begin != week) and data[i[0]][6]):
                             nextID = i[0]
                             stat = 0 if now_time < o[1][0] else 1
-                            start = o[1][0] if now_time < o[1][0] or week < begin else o[1][1]
+                            start = o[1][0] if now_time < o[1][0] or week != begin else o[1][1]
                             break 
                     if nextID: break
                 if nextID: break
@@ -309,7 +309,7 @@ def EditClass(classID):
         else:
             data = request.form
             weeks = data.get("weeks")
-            if not weeks or not(weeks in range(0, max_week)): weeks = max_week
+            if not weeks or not(int(weeks) in range(1, max_week+1)): weeks = max_week
             else: weeks = int(weeks)
             tinydb.db.remove(query[session["acc"]][classID].exists())
             tinydb.db.insert({session["acc"] : {classID: {"weeks": weeks}}})
