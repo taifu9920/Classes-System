@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block Contents %}
+<div class="w3-card-4 w3-center">
+    <div class="w3-container w3-red">
+        <h2 class="w3-rest">Extra Classes Register</h2>
+    </div>
+	<form id="extra" method = "POST">
+		<input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <div class="w3-row" style="font-size: 18px;">
+            <p style="width: 178px;" class="w3-center w3-right w3-container w3-red">Actions</p>
+            <p class="w3-container w3-red w3-rest w3-center">Class Names</p>
+        </div>
+	</form>
+</div>
+{% endblock %}
+
+{% block Button %}
+
+<button class='w3-btn w3-blue' id='Home'>Home</button>
+
+{% endblock %}

@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 from flask import Flask, request, render_template, session, redirect, url_for
 from markupsafe import escape
 from flask_wtf.csrf import CSRFProtect
@@ -17,7 +18,7 @@ class TDB():
 tinydb = TDB()
 query = Query()
 tw = pytz.timezone('Asia/Taipei')
-d_start = datetime(2020,9,14,0,0,0,0,tw)
+
 
 
 #Logger file path
@@ -30,7 +31,9 @@ def gen_checkbox(id, week, holder, value):
 TimeCompare = lambda obj, val: obj[0] < val and val < obj[1]
 
 #Get the week since started classes
-getWeek = lambda: str(((datetime.now(tw) - d_start).days // 7) + 1)
+def getWeek(digit = False):
+    weeknow = ((datetime.now(tw) - d_start).days // 7) + 1
+    return weeknow if digit else ("第 {} 周".format(weeknow) if weeknow <= 18 else "UwU放假囉UwU" )
 
 #Check exist path
 PathExist = lambda path: os.path.exists(path)
@@ -83,8 +86,10 @@ def Auth(acc, psw):
     for i in datas.items():
         if not tinydb.db.get(query[session["acc"]][i[0]].exists()):
             tinydb.db.insert({session["acc"] : {i[0]: {"weeks": max_week}}})
-            room = i[1][6].split(",")[0].strip()
-            if room == "": room = "無標記教室"
+            room = i[1][6]
+            print(i)
+            if room: room = room.split(",")[0].strip()
+            else: room = ""
             for o in range(1, max_week + 1):
                 room = RoomTranslate(room)
                 tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
@@ -139,12 +144,38 @@ def classes():
     incoming(request)
     return "WIP"
 
+@app.route("/extra/register")
+def register():
+    
+
+
+    return "WIP uwu"
+
+@app.route("/extra")
+def extra():
+    incoming(request)
+    if tinydb.db.get(query[session["acc"]]["Extra"].exists()):
+        return render_template("extra.html", Extralist = """<div class="w3-right" style="width: 169px;">
+        <p class='w3-red w3-center w3-container' style='width:120px;'>test</p>
+        <button style='width: 49px;' class='w3-container w3-button w3-red w3-xlarge'>X</button></div>
+        <p class='w3-red w3-rest w3-center w3-container'>Class Name</p>""", week=getWeek())
+    else:
+        return render_template("extra.html", Extralist = "<div class='w3-rest w3-green w3-container'><p>Nothing yet registered!</p></div>",  week=getWeek())
+
+#Show Classes
 @app.route("/classes")
 def classView():
     incoming(request)
     if session.get("login"):
+    #If already login
+    	#Access user's login session infos
         sess = Auth(session["acc"], session["psw"])
         if sess:
+            #Make sure User have login session
+            weeknow = getWeek(True)
+            if weeknow > 18: return redirect(url_for("Root")) #In case already passed 18 weeks, CLASS END YEEEE
+            
+            #Start searching for class list
             resp = sess.get("https://course.nuk.edu.tw/Sel/roomlist1.asp")
             resp.encoding = "big5"
             info = bs4.BeautifulSoup(resp.text, "lxml")
@@ -153,7 +184,8 @@ def classView():
             classes["style"] = None
             classes.tr["class"] = "w3-green"
             data = Classdata(sess)
-            weeknow = int(getWeek())
+            #Theme change
+            #Also parse some informations
             for i in classes.find_all("tr")[1:]:
                 for o in i.find_all("td")[:2]:
                     o["class"] = "w3-green"
@@ -217,7 +249,8 @@ def classView():
             note = tinydb.db.get(query[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)].exists())
             if note: note = note[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)]
             nextclass = ("下" if week < begin else "本") + ((("周{3}{0}下課<br>正在上{1}" if stat and begin == week else "周{3}{0}上課<br>下堂課是{1}") + "<br>位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6], Date[week]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
-            return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=str(weeknow), NextClass=nextclass)
+            return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=getWeek(), NextClass=nextclass)
+    #If user didn't login yet
     logger("Not login! Redirect to Login page")
     return redirect(url_for("login"))
 

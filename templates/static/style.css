@@ -23,6 +23,48 @@ h2 {
 	margin: 0 auto;
 	display: block;
 }
+#add {
+	padding: 9.5px 0;
+	margin: 0;
+	width: 100%;
+	height: 100%;
+	vertical-align: middle;
+	text-align: center;
+	display: table-cell;
+}
+#extra div div{
+	margin: 0;
+	padding: 0;
+	display: flex;
+}
+#extra div div:after, #extra div div *:after, #extra div *:after{
+    height:100%;
+    content:'';
+    vertical-align:middle;
+    display:inline-block;
+}
+#extra div *, #extra div div *{
+	height: 49px;
+	margin: 0;
+	padding: 0;
+}
+#extra div div p, #extra div div button{
+	margin: 0;
+	padding: 0 16px;
+	height: 49px;
+	vertical-align: middle;
+	text-align: center;
+	display: table-cell;
+}
+#extra div {
+	height: auto;
+}
+#extra{
+	overflow: auto;
+	margin: 0;
+	width: 100%;
+	max-width: none;
+}
 #ClassesContent td{
 	text-align: center;
 	vertical-align: middle;
@@ -30,7 +72,7 @@ h2 {
 	font-size: 14px;
 	padding: 4px;
 	height: 100px;
-	weidth: auto;
+	width: auto;
 }
 #ClassesContent th {
 	text-align: center;
@@ -96,7 +138,7 @@ h2 {
 #manage form div *, #manage form div p {
 	display: inline-block;
 	width: 100%;
-	font-size: 14px
+	font-size: 14px;
 	color: black;
 	padding: 8px;
 }
@@ -231,8 +273,8 @@ input:checked + .slider:before {
 	background: #595959;
 }
 
-.dark h2 {
-	color: black;
+.dark p, .dark h1, .dark .w3-red{
+	color: black!important
 }
 
 .dark input, .dark textarea {
@@ -280,6 +322,9 @@ hr {
 }
 .Content form textarea {
  	resize : none;
+}
+.Content div div {
+	padding: 0;
 }
 .Content {
 	display: block;

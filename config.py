@@ -1,5 +1,9 @@
-# --- Don't change if you don't know what you doing. ---
-from datetime import time
+from datetime import time, datetime
+import pytz
+# --- Change this to setting the school begin date
+tw = pytz.timezone('Asia/Taipei')
+d_start = datetime(2021,2,22,0,0,0,0,tw)
+# --- Don't change below if you don't know what you doing. ---
 #Log type
 types = ["Info", "Warning", "Critical", "Success", "Failed"]
 #Path to save logs
