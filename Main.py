@@ -33,7 +33,7 @@ TimeCompare = lambda obj, val: obj[0] < val and val < obj[1]
 #Get the week since started classes
 def getWeek(digit = False):
     weeknow = ((datetime.now(tw) - d_start).days // 7) + 1
-    return weeknow if digit else ("第 {} 周".format(weeknow) if weeknow <= 18 else "UwU放假囉UwU" )
+    return weeknow if digit else ("第 {} 周".format(weeknow) if weeknow <= 18 and weeknow > 0 else "UwU放假囉UwU" if weeknow > 18 else "準備開學囉")
 
 #Check exist path
 PathExist = lambda path: os.path.exists(path)
@@ -89,9 +89,9 @@ def Auth(acc, psw):
             room = i[1][6]
             print(i)
             if room: room = room.split(",")[0].strip()
-            else: room = ""
+            room = RoomTranslate(room)
+            if room == "": room = "未知"
             for o in range(1, max_week + 1):
-                room = RoomTranslate(room)
                 tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
     return sess
 # ----- End of Functions -----
@@ -194,15 +194,19 @@ def classView():
                     #All classes
                     day = str((weeknow + 1) if k < datetime.now(tw).weekday() else weeknow)
                     classid = o.contents[0].string
+                    
                     weeks = tinydb.db.get(query[session["acc"]][classid].weeks.exists())
                     if weeks: weeks = weeks[session["acc"]][classid]["weeks"]
                     else: weeks = max_week
-                        
+                    
                     if str(o.contents[-1]) != "<br/>":
                         #Classes that has room
                         room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
+                        if weeknow < 1: room = tinydb.db.get(query[session["acc"]][classid]["room1"].exists())
                         if room:
-                            room = room[session["acc"]][classid]["room" + day]
+                            if weeknow < 1: room = room[session["acc"]][classid]["room1"]
+                            else: room = room[session["acc"]][classid]["room" + day]
+                            
                             o.contents[-1].replace_with(RoomTranslate(o.contents[-1]))
                             temp = [i for i in o.contents[-1].split(",") if i != room]
                             o.contents[-1].replace_with(room)
@@ -216,13 +220,15 @@ def classView():
                                 if room: o.contents.append(info.new_tag("br"))
                                 o.contents.append(info.new_string("(%s)" % temp[0]))
                             data[classid][6] = "<br>".join([str(i) for i in o.contents[3:] if str(i) != "<br/>"]).strip()
-                        else: 
+                        else:
                             o.contents = []
                             if data.get(classid): data[classid][6] = ""
                     else:
                         room = tinydb.db.get(query[session["acc"]][classid]["room" + day].exists())
+                        if weeknow < 1: room = tinydb.db.get(query[session["acc"]][classid]["room1"].exists())
                         if room:
-                            room = room[session["acc"]][classid]["room" + day]
+                            if weeknow < 1: room = room[session["acc"]][classid]["room1"]
+                            else: room = room[session["acc"]][classid]["room" + day]
                             o.contents.append(info.new_string(room))
                             data[classid][6] = room
                         else: 
@@ -249,6 +255,7 @@ def classView():
             note = tinydb.db.get(query[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)].exists())
             if note: note = note[session["acc"]][nextID]["note" + str((weeknow + 1) if week < begin else weeknow)]
             nextclass = ("下" if week < begin else "本") + ((("周{3}{0}下課<br>正在上{1}" if stat and begin == week else "周{3}{0}上課<br>下堂課是{1}") + "<br>位於{2}").format(start.strftime("%H點%M分") ,data[nextID][2], data[nextID][6], Date[week]) + (("<br>備註：%s" % note) if note else "")) if nextID else "無匹配課程...?!"
+            if weeknow < 1: nextclass = "--- 尚未開學 ---"
             return render_template("class.html", Version = "1.0.0", Tables = classes, ContentAttri = "id='ClassesContent'", week=getWeek(), NextClass=nextclass)
     #If user didn't login yet
     logger("Not login! Redirect to Login page")
