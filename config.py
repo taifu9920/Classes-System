@@ -8,8 +8,8 @@ d_start = datetime(2021,9,22,0,0,0,0,tw)
 types = ["Info", "Warning", "Critical", "Success", "Failed"]
 #Path to save logs
 LoggerPath = "Logs/"
-#ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
-ssl = None
+ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
+#ssl = None
 #Limit of weeks in a class
 max_week = 18
 
