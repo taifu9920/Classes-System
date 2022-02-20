@@ -93,9 +93,10 @@ def Auth(acc, psw):
                 tinydb.db.insert({session["acc"] : {i[0]: {"weeks": max_week}}})
                 room = i[1][6]
                 print(i)
-                if room: room = room.split(",")[0].strip()
-                room = RoomTranslate(room)
-                if room == "": room = "未知"
+                if room:
+                    room = room.split(",")[0].strip()
+                    room = RoomTranslate(room)
+                if not room: room = "未知"
                 for o in range(1, max_week + 1):
                     tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
     return sess
