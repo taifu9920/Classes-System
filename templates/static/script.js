@@ -84,6 +84,23 @@ function CopyArea() {
 	document.getElementsByClassName("Popup")[0].classList.toggle("show");
 }
 
+function push_message() {
+	console.log("sub_token", localStorage.getItem('sub_token'));
+	$.ajax({
+		type: "POST",
+		url: "/push_v1/",
+		contentType: 'application/json; charset=utf-8',
+		dataType:'json',
+		data: JSON.stringify({'sub_token':localStorage.getItem('sub_token')}),
+		success: function( data ){
+			console.log("success",data);
+    },
+    error: function( jqXhr, textStatus, errorThrown ){
+        console.log("error",errorThrown);
+    }
+	});
+}
+
 function Load() {
 	setThemeFromCookie()
 	document.getElementById("slider").addEventListener("change", toggleTheme);
@@ -92,6 +109,44 @@ function Load() {
 	var Return = document.getElementById("Return");
 	if (Home != null) Home.addEventListener("click", function(){window.location.href = "/";});
 	if (Return != null) Return.addEventListener("click", function(){window.location.replace(document.referrer)});
+	
+	if ('serviceWorker' in navigator && 'PushManager' in window) {
+		console.log('Service Worker and Push is supported');
+
+		navigator.serviceWorker.register("./static/notify.js")
+		.then(function(swReg) {
+			console.log('Service Worker is registered', swReg);
+
+			swRegistration = swReg;
+			swRegistration.pushManager.getSubscription().then(function(subscription) {
+				isSubscribed = !(subscription === null);
+
+				if (isSubscribed) {
+					console.log('User IS subscribed.');
+				} else {
+					console.log('User is NOT subscribed.');
+					
+					swRegistration.pushManager.subscribe({
+						userVisibleOnly: true,
+						applicationServerKey: applicationServerKey
+					}).then(function(subscription) {
+						console.log('User is subscribed.');
+
+						localStorage.setItem('sub_token', JSON.stringify(subscription));
+					})
+					.catch(function(err) {
+						console.log('Failed to subscribe the user: ', err);
+					});
+				}
+				
+
+			});
+		})
+		.catch(function(error) {
+			console.error('Service Worker Error', error);
+		});
+} else {
+	}
 	
 	$(".checkbox").change(function() {
 		this.parentNode.childNodes[2].disabled = !this.checked

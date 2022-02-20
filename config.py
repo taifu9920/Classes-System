@@ -2,14 +2,14 @@ from datetime import time, datetime
 import pytz
 # --- Change this to setting the school begin date
 tw = pytz.timezone('Asia/Taipei')
-d_start = datetime(2021,9,22,0,0,0,0,tw)
+d_start = datetime(2022,2,21,0,0,0,0,tw)
 # --- Don't change below if you don't know what you doing. ---
 #Log type
 types = ["Info", "Warning", "Critical", "Success", "Failed"]
 #Path to save logs
 LoggerPath = "Logs/"
-#ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
-ssl = None
+ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
+#ssl = None
 #Limit of weeks in a class
 max_week = 18
 

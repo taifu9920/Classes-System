@@ -89,17 +89,18 @@ def Auth(acc, psw):
             tinydb.db.insert({session["acc"] : {i[0]: {"weeks": max_week}}})
             room = i[1][6]
             print(i)
-            if room: room = room.split(",")[0].strip()
-            room = RoomTranslate(room)
-            if room == "": room = "未知"
+            if room:
+                room = room.split(",")[0].strip()
+                room = RoomTranslate(room)
+            else:
+                room = "未知"
             for o in range(1, max_week + 1):
                 tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
     return sess
 # ----- End of Functions -----
 
 # ----- Flask Programs -----
-app = Flask(__name__, static_folder='templates/static', 
-template_folder='templates', )
+app = Flask(__name__, static_folder='templates/static', template_folder='templates', )
 #Secret generating and saving
 secret = tinydb.db.get(query.secret.exists())
 if secret == None: secret = os.urandom(24).hex() ; tinydb.db.insert({"secret": secret})
