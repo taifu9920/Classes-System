@@ -217,6 +217,7 @@ def classView():
                         if str(o.contents[-1]).strip() != "":
                             #All classes
                             #cache check
+                            
                             classid = o.contents[0].string
                             if classid in temp:
                                 o.contents = temp[classid]

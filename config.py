@@ -8,22 +8,22 @@ d_start = datetime(2022,2,21,0,0,0,0,tw)
 types = ["Info", "Warning", "Critical", "Success", "Failed"]
 #Path to save logs
 LoggerPath = "Logs/"
-ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
-#ssl = None
+#ssl = ("../Certs/cert.pem", "../Certs/privkey.pem")
+ssl = None
 #Limit of weeks in a class
 max_week = 18
 
 #Building name of each classrooms
 Codes = {
-    "B01":"綜合大樓",
-    "C01":"工學院",
-    "C02":"理學院",
-    "K01":"體育休閒大樓",
-    "L01":"圖資大樓",
-    "L02":"法學院",
-    "M01":"管學院",
-    "H1-":"人社科學院",
-    "H2-":"人社科學院" 
+    "B01-":"綜合大樓 ",
+    "C01-":"工學院 ",
+    "C02-":"理學院 ",
+    "K01-":"體育休閒大樓 ",
+    "L01-":"圖資大樓 ",
+    "L02-":"法學院 ",
+    "M01-":"管學院 ",
+    "H1-":"人社科學院 ",
+    "H2-":"人社科學院 " 
     }
 
 #Time of classes
