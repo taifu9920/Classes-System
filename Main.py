@@ -87,18 +87,19 @@ def Auth(acc, psw):
     session["login"] = "Yes"
     #Also init any classes that don't have datas
     datas = Classdata(sess)
-    for i in datas.items():
-        if not tinydb.db.get(query[session["acc"]][i[0]].exists()):
-            tinydb.db.insert({session["acc"] : {i[0]: {"weeks": max_week}}})
-            room = i[1][6]
-            print(i)
-            if room:
-                room = room.split(",")[0].strip()
-                room = RoomTranslate(room)
-            else:
-                room = "未知"
-            for o in range(1, max_week + 1):
-                tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
+    if datas != "":
+        for i in datas.items():
+            if not tinydb.db.get(query[session["acc"]][i[0]].exists()):
+                tinydb.db.insert({session["acc"] : {i[0]: {"weeks": max_week}}})
+                room = i[1][6]
+                print(i)
+                if room:
+                    room = room.split(",")[0].strip()
+                    room = RoomTranslate(room)
+                else:
+                    room = "未知"
+                for o in range(1, max_week + 1):
+                    tinydb.db.insert({session["acc"]:{i[0]: {"room" + str(o): room}}})
     return sess
 # ----- End of Functions -----
 
