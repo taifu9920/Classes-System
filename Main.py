@@ -198,8 +198,8 @@ def classView():
                 #Format the header
                 k = 0
                 for i in classes.find("tr").find_all("th")[1:]:
-                    deltaweekday = k - datetime.now(tw).weekday()
-                    thatday = datetime.now(tw) + timedelta(days=deltaweekday)
+                    deltaweekday = k - (datetime.now(tw) if weeknow >= 1 else d_start).weekday()
+                    thatday = (datetime.now(tw) if weeknow >= 1 else d_start) + timedelta(days=deltaweekday)
                     i.contents.insert(0, info.new_tag("br"))
                     i.contents.insert(0, info.new_string(thatday.strftime("%m/%d")))
                     i.contents.append(info.new_tag("br"))
