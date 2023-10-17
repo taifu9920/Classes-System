@@ -76,7 +76,10 @@ def RoomTranslate(room):
 #Login to class selection system and get Session
 def Auth(acc, psw):
     sess = requests.session()
-    resp = sess.post("https://course.nuk.edu.tw/Sel/SelectMain1.asp", {"Account": acc, "Password": psw, "B1": "%B5n%A1%40%A1%40%A4J"})
+    login_response = sess.get("https://course.nuk.edu.tw/Sel/Login.asp")
+    soup = bs4.BeautifulSoup(login_response.content, 'html.parser')
+    csrf_token = soup.find('input', {'name': 'CSRFToken'})['value']
+    resp = sess.post("https://course.nuk.edu.tw/Sel/SelectMain1.asp", {"CSRFToken": csrf_token ,"Account": acc, "Password": psw, "B1": "%B5n%A1%40%A1%40%A4J"})
     resp.encoding = "big5"
     info = bs4.BeautifulSoup(resp.text, "lxml")
     if info.b.text == "帳號、密碼有誤，請確認後再重新登入！":
